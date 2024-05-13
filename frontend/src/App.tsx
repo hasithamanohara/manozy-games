@@ -6,9 +6,9 @@ import ScrollToTop from '@/components/scroll-to-top';
 import Footer from '@/layouts/footer-layout';
 import SignIn from '@/pages/signin-page';
 import SignUp from '@/pages/signup-page';
-import AdminUsers from '@/pages/admin-users';
-import AdminBlogs from '@/pages/admin-blogs';
-import AdminContainer from './components/admin-container';
+// import AdminUsers from '@/pages/admin-users';
+// import AdminBlogs from '@/pages/admin-blogs';
+// import AdminContainer from './components/admin-container';
 
 function App() {
   return (
@@ -22,10 +22,10 @@ function App() {
             <Route path="details-page/:title/:postId" element={<DetailsPage />} />
             <Route path="signin" element={<SignIn />} />
             <Route path="signup" element={<SignUp />} />
-            <Route path="admin" element={<AdminContainer />}>
+            {/* <Route path="admin" element={<AdminContainer />}>
               <Route path="users" element={<AdminUsers />} />
               <Route path="blogs" element={<AdminBlogs />} />
-            </Route>
+            </Route> */}
           </Route>
         </Routes>
         <Footer />

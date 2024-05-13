@@ -4,14 +4,53 @@ import formatPostTime from '@/utils/format-post-time';
 import CategoryPill from '@/components/category-pill';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import FeaturedPostCard from '@/components/featured-post-card';
+import LatestPostCard from '@/components/latest-post-card';
+import { FeaturedPostCardSkeleton } from '@/components/skeletons/featured-post-card-skeleton';
+import { LatestPostCardSkeleton } from '@/components/skeletons/latest-post-card-skeleton';
+import { categories } from '@/utils/category-colors';
 
 export default function DetailsPage() {
   const { state } = useLocation();
   const [post, setPost] = useState(state?.post);
   const initialVal = post === undefined;
-  const [loading, setIsLoading] = useState(initialVal);
+  const [DPloading, setIsLoading] = useState(initialVal);
   const { postId } = useParams();
   const navigate = useNavigate();
+
+  const [selectedCategory, setSelectedCategory] = useState('featured');
+  const [posts, setPosts] = useState([]);
+  const [latestPosts, setLatestPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let categoryEndpoint =
+      selectedCategory === 'featured'
+        ? '/api/posts/featured'
+        : `/api/posts/categories/${selectedCategory}`;
+
+    setLoading(true);
+    axios
+      .get(import.meta.env.VITE_API_PATH + categoryEndpoint)
+      .then((response) => {
+        setPosts(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    axios
+      .get(import.meta.env.VITE_API_PATH + '/api/posts/latest')
+      .then((response) => {
+        setLatestPosts(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []);
 
   useEffect(() => {
     const getPostById = async () => {
@@ -59,11 +98,63 @@ export default function DetailsPage() {
             </p>
           </div>
         </div>
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-y-4 px-4 py-10">
-          <div>
-            <p className="leading-7 text-light-secondary dark:text-dark-secondary md:text-lg">
-              {post.description}
-            </p>
+
+        <div className="mx-auto my-6">
+          <div className="flex flex-row justify-start">
+            <div className="md:w-2/3">
+              <div className="flex flex-col">
+                <div className="ml-32 flex max-w-3xl flex-col items-center py-10">
+                  <div className="flex flex-wrap dark:rounded-lg dark:bg-dark-card dark:p-3">
+                    <p className="leading-7 text-light-secondary dark:text-dark-secondary md:text-lg">
+                      {post.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="md:w-3/12 flex flex-col py-10">
+              <div className="mb-6">
+                <div className="-mb-1 cursor-text text-base tracking-wide text-light-tertiary dark:text-dark-tertiary">
+                  Discover by topic
+                </div>
+                <h2 className="mb-2 cursor-text text-xl font-semibold dark:text-dark-primary">
+                  Categories
+                </h2>
+                <div className="flex flex-wrap gap-3 dark:rounded-lg dark:bg-dark-card dark:p-3">
+                  {categories.map((category) => (
+                    <button
+                      name="category"
+                      key={category}
+                      aria-label={category}
+                      type="button"
+                      onClick={() =>
+                        setSelectedCategory(selectedCategory === category ? 'featured' : category)
+                      }
+                    >
+                      <CategoryPill category={category} selected={selectedCategory === category} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div className="-mb-1 cursor-text text-base tracking-wide text-slate-500 dark:text-dark-tertiary">
+                  What's new?
+                </div>
+                <h2 className="mb-2 cursor-text text-xl font-semibold dark:text-dark-primary">
+                  Latest Posts
+                </h2>
+                <div className="flex flex-col gap-4">
+                  {latestPosts.length === 0
+                    ? Array(5)
+                        .fill(0)
+                        .map((_, index) => <LatestPostCardSkeleton key={index} />)
+                    : latestPosts
+                        .slice(0, 5)
+                        .map((post, index) => <LatestPostCard key={index} post={post} />)}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
